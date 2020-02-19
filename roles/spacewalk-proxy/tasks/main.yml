@@ -1,6 +1,8 @@
 ---
-- name: Install Spacewalk main repository
-  yum: name=https://copr-be.cloud.fedoraproject.org/results/@spacewalkproject/spacewalk-2.9/epel-{{ansible_distribution_major_version}}-x86_64/00912457-spacewalk-repo/spacewalk-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm
+- name: Install Spacewalk repository
+  yum:
+    name: "{{ spacewalk_server_repo }}"
+    state: present
 
 - name: Install all packages for spacewalk proxy
   yum:

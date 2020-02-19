@@ -27,7 +27,9 @@
   lineinfile: dest=/etc/hosts regexp=^{{ spacewalk_ip }} line="{{ spacewalk_ip }} {{ spacewalk_hostname }}"
 
 - name: (CentOS) install spacewalk repository
-  yum: name=https://copr-be.cloud.fedoraproject.org/results/%40spacewalkproject/spacewalk-2.9-client/epel-{{ansible_distribution_major_version}}-x86_64/00911911-spacewalk-repo/spacewalk-client-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm  state=present
+  yum:
+    name: "{{ spacewalk_client_repo }}"
+    state: present
   when: ansible_distribution == "CentOS"
 
 - name: (CentOS 6) install extra packages

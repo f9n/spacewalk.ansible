@@ -21,6 +21,9 @@ spacewalk_proxy:
 spacewalk_proxy_username:
 spacewalk_proxy_password:
 
+spacewalk_server_repo: "https://copr-be.cloud.fedoraproject.org/results/@spacewalkproject/spacewalk-2.9/epel-{{ansible_distribution_major_version}}-x86_64/00912457-spacewalk-repo/spacewalk-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm"
+spacewalk_client_repo: "https://copr-be.cloud.fedoraproject.org/results/@spacewalkproject/spacewalk-2.9/epel-{{ansible_distribution_major_version}}-x86_64/00912457-spacewalk-repo/spacewalk-client-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm"
+
 # Path to the environment file
 environment_file: /etc/environment
 # The environment file owner
