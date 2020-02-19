@@ -15,7 +15,7 @@ ssl_org: Spacewalk
 ssl_orgunit: proxy1.example.com
 ssl_common: proxy1.example.com
 ssl_city: Amsterdam
-ssl_state: Noord Holland 
+ssl_state: Noord Holland
 ssl_country: NL
 ssl_password: spacewalk
 populate_config_channel: Y

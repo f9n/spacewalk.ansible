@@ -6,6 +6,6 @@
   roles:
     - role: iptables
       firewall_allowed_tcp_ports:
-      - 22
-      - 5222
+        - 22
+        - 5222
     - role: spacewalk-client

@@ -4,7 +4,6 @@ spacewalk_hostname: spacewalk-server
 spacewalk_ip: 10.102.1.101
 gpg_pubkeyfileexport: spacewalk.asc
 
-
 # Path to the environment file
 environment_file: /etc/environment
 # The environment file owner

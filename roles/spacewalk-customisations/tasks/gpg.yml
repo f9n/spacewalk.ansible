@@ -5,17 +5,17 @@
   command: "cat /proc/sys/kernel/random/entropy_avail"
   changed_when: false
   register: entropy
-  
+
 - debug: var=entropy
 
 - name: "GPG Generate: yum | Ensure have enough randomness"
-  yum: 
-    name: ['haveged', 'rng-tools', 'gnupg', 'acl']
-    state: present 
+  yum:
+    name: ["haveged", "rng-tools", "gnupg", "acl"]
+    state: present
     update_cache: yes
   register: pkg_result
   until: pkg_result is success
-  
+
 - name: "GPG Generate: Enable haveged"
   service:
     name: haveged
@@ -23,12 +23,12 @@
     enabled: yes
   when: >
     not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
-    
+
 - name: "GPG Generate: check entropy state"
   command: "cat /proc/sys/kernel/random/entropy_avail"
   changed_when: false
   register: entropy2
-  
+
 - debug: var=entropy2
 
 - name: "GPG Generate: Ensure .gnupg config directory exists with right permissions"

@@ -1,51 +1,50 @@
 ---
- 
 - name: Install spacewalk api script
-  copy: 
+  copy:
     src: "{{ role_path }}/files/swapi.py"
     dest: /usr/sbin/swapi.py
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0755
 
 - name: Install spacewalk api config
-  template: 
+  template:
     src: swapi.conf.j2
     dest: /etc/swapi.conf
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0644
 
 - name: Install regen-apt-repodata.py script
-  copy: 
+  copy:
     src: "{{ role_path }}/files/regen-apt-repodata.py"
     dest: /usr/sbin/regen-apt-repodata.py
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0755
 
 - name: Apt Errata - install templates
-  template: 
+  template:
     src: errata-import.py.j2
     dest: /usr/sbin/errata-import.py
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0755
-  
+
 - name: Install parseUbuntu.py script
-  copy: 
+  copy:
     src: "{{ role_path }}/files/parseUbuntu.py"
     dest: /usr/sbin/parseUbuntu.py
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0755
 
 - name: Install reposync script
-  template: 
+  template:
     src: RepoSync.sh.j2
     dest: /usr/sbin/RepoSync.sh
-    owner: root 
-    group: root 
+    owner: root
+    group: root
     mode: 0755
 
 - include: gpg.yml

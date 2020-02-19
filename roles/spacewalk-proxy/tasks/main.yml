@@ -4,7 +4,7 @@
 
 - name: Install all packages for spacewalk proxy
   yum:
-    name: ['spacewalk-proxy-selinux', 'spacewalk-proxy-installer']
+    name: ["spacewalk-proxy-selinux", "spacewalk-proxy-installer"]
     state: present
 
 - name: create ssl-build directory
@@ -17,4 +17,4 @@
 
 - name: configure proxy
   command: configure-proxy.sh --answer-file=/var/tmp/answers
-           creates=/var/satellite
+    creates=/var/satellite

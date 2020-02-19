@@ -1,5 +1,5 @@
 ---
-  - include: prepare.yml
-  - include: yum.yml
-  - include: apt.yml
-  - include: finalize.yml
+- include: prepare.yml
+- include: yum.yml
+- include: apt.yml
+- include: finalize.yml

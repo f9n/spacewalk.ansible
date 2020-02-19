@@ -2,15 +2,16 @@
 - hosts: SpacewalkServer
   sudo: yes
   pre_tasks:
-    - hostname: name=spacewalk-server
+    - hostname:
+        name: spacewalk-server
   roles:
     - spacewalk
     - role: iptables
       firewall_allowed_tcp_ports:
-      - 22
-      - 80
-      - 443
-      - 5222
-      - 5269
+        - 22
+        - 80
+        - 443
+        - 5222
+        - 5269
     - role: spacewalk-customisations
     - role: spacewalk-client

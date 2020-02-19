@@ -27,7 +27,7 @@
 - name: Associate apt repos to channels
   command: spacecmd --user=admin --password={{spacewalk_admin_password}} -- softwarechannel_addrepo {{item.label}} {{item.repo}}
   with_items: "{{ spacewalk_apt_repo_info | union(spacewalk_child_apt_repo_info) }}"
-  
+
 - name: Associate apt child channels with activationkeys
   command: spacecmd --user=admin --password={{spacewalk_admin_password}} -- activationkey_addchildchannels {{item.activationkey}}  {{item.label}}
   ignore_errors: true

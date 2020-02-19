@@ -1,104 +1,135 @@
 ---
-  - name: Disable SELinux
-    selinux:
-      state: disabled
+- name: Disable SELinux
+  selinux:
+    state: disabled
 
-  - name: Ensure environment file exists
-    file:
-      path: "{{ environment_file }}"
-      owner: "{{ environment_file_owner }}"
-      group: "{{ environment_file_group }}"
-      state: touch
-    register: environment_file_result
-    changed_when: environment_file_result.diff.before.state != "file"
+- name: Ensure environment file exists
+  file:
+    path: "{{ environment_file }}"
+    owner: "{{ environment_file_owner }}"
+    group: "{{ environment_file_group }}"
+    state: touch
+  register: environment_file_result
+  changed_when: environment_file_result.diff.before.state != "file"
 
-  - name: Configuring environment
-    lineinfile:
-      dest: "{{ environment_file }}"
-      regexp: "{{ item.regexp }}"
-      line: "{{ item.line }}"
-    with_items:
-      - { regexp: '^LANGUAGE=', line: 'LANGUAGE="en_US:en"' }
-      - { regexp: '^LC_ALL=', line: 'LC_ALL="en_US.utf8"' }
-      - { regexp: '^LC_CTYPE=', line: 'LC_CTYPE="en_US.utf8"' }
-      - { regexp: '^LANG=', line: 'LANG="en_US.utf8"' }
-      - { regexp: '^no_proxy=', line: 'no_proxy="127.0.0.1, localhost, {{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}}, {{ spacewalk_hostname }}"' }
-      
-  - name: Enable EPEL
-    yum: 
-      name: epel-release
-      state: present
+- name: Configuring environment
+  lineinfile:
+    dest: "{{ environment_file }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: "^LANGUAGE=", line: 'LANGUAGE="en_US:en"' }
+    - { regexp: "^LC_ALL=", line: 'LC_ALL="en_US.utf8"' }
+    - { regexp: "^LC_CTYPE=", line: 'LC_CTYPE="en_US.utf8"' }
+    - { regexp: "^LANG=", line: 'LANG="en_US.utf8"' }
+    - {
+        regexp: "^no_proxy=",
+        line: 'no_proxy="127.0.0.1, localhost, {{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}}, {{ spacewalk_hostname }}"',
+      }
 
-  - name: Install Spacewalk repository
-    yum: 
-      name: https://copr-be.cloud.fedoraproject.org/results/@spacewalkproject/spacewalk-2.9/epel-{{ansible_distribution_major_version}}-x86_64/00912457-spacewalk-repo/spacewalk-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm
-      state: present
- 
-  - name: Install Spacewalk Client repository
-    yum: 
-      name: https://copr-be.cloud.fedoraproject.org/results/%40spacewalkproject/spacewalk-2.9-client/epel-{{ansible_distribution_major_version}}-x86_64/00911911-spacewalk-repo/spacewalk-client-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm
-      state: present
- 
-  - name: Copy rpm files to server
-    copy: 
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-    with_items:
-      - { src: '{{ role_path }}/files/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm', dest: '/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm' }
-      - { src: '{{ role_path }}/files/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm', dest: '/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm' }
-    
-  - name: Install Spacewalk-setup-postgresql
-    yum: 
-      name: ['spacewalk-setup-postgresql', 'osa-dispatcher', '/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm', '/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm']
-      state: present
+- name: Enable EPEL
+  yum:
+    name: epel-release
+    state: present
 
-  - name: remove local rpm files
-    file:
-      path: ['/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm', '/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm']
-      state: absent
+- name: Install Spacewalk repository
+  yum:
+    name: https://copr-be.cloud.fedoraproject.org/results/@spacewalkproject/spacewalk-2.9/epel-{{ansible_distribution_major_version}}-x86_64/00912457-spacewalk-repo/spacewalk-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm
+    state: present
 
-  - name: Ensure hostname in /etc/hosts
-    lineinfile: 
-      dest: /etc/hosts 
-      regexp: ^{{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}}
-      line: "{{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}} {{ spacewalk_hostname }}"
+- name: Install Spacewalk Client repository
+  yum:
+    name: https://copr-be.cloud.fedoraproject.org/results/%40spacewalkproject/spacewalk-2.9-client/epel-{{ansible_distribution_major_version}}-x86_64/00911911-spacewalk-repo/spacewalk-client-repo-2.9-4.el{{ansible_distribution_major_version}}.noarch.rpm
+    state: present
 
-  - name: Install spacewalk-postgresql
-    yum: 
-      name: spacewalk-postgresql 
-      state: present
+- name: Copy rpm files to server
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - {
+        src: "{{ role_path }}/files/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm",
+        dest: "/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm",
+      }
+    - {
+        src: "{{ role_path }}/files/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm",
+        dest: "/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm",
+      }
 
-  - name: initialize DB - bug 1524221
-    command: postgresql-setup initdb
-    args:
-      creates: "/var/lib/pgsql/data/pg_ident.conf"
+- name: Install Spacewalk-setup-postgresql
+  yum:
+    name:
+      [
+        "spacewalk-setup-postgresql",
+        "osa-dispatcher",
+        "/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm",
+        "/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm",
+      ]
+    state: present
 
-  - name: Copy answers file for spacewalk setip
-    template: 
-      src: answers.j2 
-      dest: /var/tmp/answers 
-      owner: root 
-      group: root 
-      mode: 0600
+- name: remove local rpm files
+  file:
+    path:
+      [
+        "/tmp/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm",
+        "/tmp/oracle-instantclient11.2-sqlplus-11.2.0.4.0-1.x86_64.rpm",
+      ]
+    state: absent
 
-  - name: Install spacewalk
-    command: spacewalk-setup --answer-file=/var/tmp/answers
-    args:
-      creates: /var/log/rhn/install_db.log
+- name: Ensure hostname in /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: ^{{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}}
+    line: "{{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}} {{ spacewalk_hostname }}"
 
-  - name: Making sure html pub exists
-    file:
-      path: /var/www/html/pub
-      recurse: yes
-      state: directory
-      mode: '0755'
+- name: Install spacewalk-postgresql
+  yum:
+    name: spacewalk-postgresql
+    state: present
 
-  - name: Copy OSAD UBUNTU client packages to server
-    copy: 
-      src: "{{ item.src }}"
-      dest: "{{ item.dest }}"
-    with_items:
-      - { src: '{{ role_path }}/files/osad_5.11.108-bionic_all.deb', dest: '/var/www/html/pub/osad_5.11.108-bionic_all.deb' }
-      - { src: '{{ role_path }}/files/osad_5.11.108-xenial_all.deb', dest: '/var/www/html/pub/osad_5.11.108-xenial_all.deb' }
-      - { src: '{{ role_path }}/files/pyjabber_0.5.0-1.4-bionic_all.deb', dest: '/var/www/html/pub/pyjabber_0.5.0-1.4-bionic_all.deb' }
-      - { src: '{{ role_path }}/files/pyjabber_0.5.0-1.4-xenial_all.deb', dest: '/var/www/html/pub/pyjabber_0.5.0-1.4-xenial_all.deb' }
+- name: initialize DB - bug 1524221
+  command: postgresql-setup initdb
+  args:
+    creates: "/var/lib/pgsql/data/pg_ident.conf"
+
+- name: Copy answers file for spacewalk setip
+  template:
+    src: answers.j2
+    dest: /var/tmp/answers
+    owner: root
+    group: root
+    mode: 0600
+
+- name: Install spacewalk
+  command: spacewalk-setup --answer-file=/var/tmp/answers
+  args:
+    creates: /var/log/rhn/install_db.log
+
+- name: Making sure html pub exists
+  file:
+    path: /var/www/html/pub
+    recurse: yes
+    state: directory
+    mode: "0755"
+
+- name: Copy OSAD UBUNTU client packages to server
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - {
+        src: "{{ role_path }}/files/osad_5.11.108-bionic_all.deb",
+        dest: "/var/www/html/pub/osad_5.11.108-bionic_all.deb",
+      }
+    - {
+        src: "{{ role_path }}/files/osad_5.11.108-xenial_all.deb",
+        dest: "/var/www/html/pub/osad_5.11.108-xenial_all.deb",
+      }
+    - {
+        src: "{{ role_path }}/files/pyjabber_0.5.0-1.4-bionic_all.deb",
+        dest: "/var/www/html/pub/pyjabber_0.5.0-1.4-bionic_all.deb",
+      }
+    - {
+        src: "{{ role_path }}/files/pyjabber_0.5.0-1.4-xenial_all.deb",
+        dest: "/var/www/html/pub/pyjabber_0.5.0-1.4-xenial_all.deb",
+      }
