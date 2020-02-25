@@ -1,0 +1,23 @@
+---
+- name: (Ubuntu) Get apt source list file info
+  stat:
+    path: /etc/apt/sources.list
+  register: apt_source_list_info
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Move source.list to source.list.bak
+  shell: mv /etc/apt/sources.list /etc/apt/sources.list.bak
+  when:
+    - ansible_distribution == "Ubuntu"
+    - apt_source_list_info.stat.islnk is defined
+
+- name: (CentOS) Create archive directory for existing yum repos
+  file:
+    path: /etc/yum.repos.d/archive
+    state: directory
+  when: ansible_distribution == "CentOS"
+
+- name: (CentOS) Remove existing yum repos
+  shell: mv /etc/yum.repos.d/* /etc/yum.repos.d/archive
+  ignore_errors: yes
+  when: ansible_distribution == "CentOS"

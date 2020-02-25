@@ -1,0 +1,112 @@
+- name: (CentOS) install spacewalk repository
+  yum:
+    name: "{{ spacewalk_client_repo }}"
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: (CentOS 6) install extra packages
+  yum: name=http://dl.fedoraproject.org/pub/epel/6/{{ ansible_machine }}/epel-release-6-8.noarch.rpm state=present
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "6"
+
+- name: (CentOS 7) install extra packages
+  yum: name=epel-release state=present
+  when: ansible_distribution == "CentOS" and ansible_distribution_major_version == "7"
+
+- name: (CentOS) Install required client packages
+  yum:
+    name:
+      [
+        "rhn-client-tools",
+        "rhn-check",
+        "rhn-setup",
+        "rhnsd",
+        "m2crypto",
+        "yum-rhn-plugin",
+        "osad",
+      ]
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: (Ubuntu) Add Spacewalk Client repo key
+  apt_key:
+    url: http://download.opensuse.org/repositories/systemsmanagement:/spacewalk:/2.9:/debclients/xUbuntu_{{ ansible_distribution_version }}/Release.key
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Add Spacewalk Client repo
+  apt_repository:
+    repo: "deb http://download.opensuse.org/repositories/systemsmanagement:/spacewalk:/2.9:/debclients/xUbuntu_{{ ansible_distribution_version }}/ /"
+    state: present
+    filename: spacewalk2.9-debclients.list
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Install packages
+  apt:
+    name:
+      [
+        "rhn-client-tools",
+        "rhn-check",
+        "rhn-setup",
+        "rhnsd",
+        "apt-transport-spacewalk",
+        "rhncfg",
+        "rhncfg-actions",
+      ]
+    state: present
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Remove Spacewalk Client repo
+  apt_repository:
+    repo: "deb http://download.opensuse.org/repositories/systemsmanagement:/spacewalk:/2.9:/debclients/xUbuntu_{{ ansible_distribution_version }}/ /"
+    state: absent
+    filename: spacewalk2.9-debclients.list
+    update_cache: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Fix packages infinitly listed as upgradable within apt-transport-spacewalk
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - {
+        src: "{{ role_path }}/files/pre_invoke.py",
+        dest: "/usr/lib/apt-spacewalk/pre_invoke.py",
+      }
+    - {
+        src: "{{ role_path }}/files/post_invoke.py",
+        dest: "/usr/lib/apt-spacewalk/post_invoke.py",
+      }
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Download OSAD packages
+  get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
+  with_items:
+    - {
+        url: "http://{{ spacewalk_hostname }}/pub/pyjabber_0.5.0-1.4-{{ ansible_distribution_release }}_all.deb",
+        dest: "/tmp/pyjabber_0.5.0-1.4-{{ ansible_distribution_release }}_all.deb",
+      }
+    - {
+        url: "http://{{ spacewalk_hostname }}/pub/osad_5.11.108-{{ ansible_distribution_release }}_all.deb",
+        dest: "/tmp/osad_5.11.108-{{ ansible_distribution_release }}_all.deb",
+      }
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Install OSAD packages
+  shell: dpkg -i /tmp/pyjabber_0.5.0-1.4-{{ ansible_distribution_release }}_all.deb /tmp/osad_5.11.108-{{ ansible_distribution_release }}_all.deb
+  when: ansible_distribution == "Ubuntu"
+
+- name: (Ubuntu) Remove local deb files
+  file:
+    path:
+      [
+        "/tmp/osad_5.11.108-{{ ansible_distribution_release }}_all.deb",
+        "/tmp/pyjabber_0.5.0-1.4-{{ ansible_distribution_release }}_all.deb",
+      ]
+    state: absent

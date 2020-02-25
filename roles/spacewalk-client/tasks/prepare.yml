@@ -1,0 +1,27 @@
+---
+- name: (All) Ensure environment file exists
+  file:
+    path: "{{ environment_file }}"
+    owner: "{{ environment_file_owner }}"
+    group: "{{ environment_file_group }}"
+    state: touch
+  register: environment_file_result
+  changed_when: environment_file_result.diff.before.state != "file"
+
+- name: (All) Configuring environment
+  lineinfile:
+    dest: "{{ environment_file }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { regexp: "^LANGUAGE=", line: 'LANGUAGE="en_US:en"' }
+    - { regexp: "^LC_ALL=", line: 'LC_ALL="en_US.utf8"' }
+    - { regexp: "^LC_CTYPE=", line: 'LC_CTYPE="en_US.utf8"' }
+    - { regexp: "^LANG=", line: 'LANG="en_US.utf8"' }
+    - {
+        regexp: "^no_proxy=",
+        line: 'no_proxy="127.0.0.1, localhost, {{ansible_default_ipv4.address|default(ansible_all_ipv4_addresses[0])}}, {{ spacewalk_hostname }}"',
+      }
+
+- name: (All) Ensure spacewalk hostname in /etc/hosts
+  lineinfile: dest=/etc/hosts regexp=^{{ spacewalk_ip }} line="{{ spacewalk_ip }} {{ spacewalk_hostname }}"
