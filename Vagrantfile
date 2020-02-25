@@ -23,10 +23,23 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  config.vm.define "client" do |client|
-    client.vm.box = "ubuntu/xenial64"
-    client.vm.network "private_network", ip: "192.168.33.71"
-    client.vm.provision "ansible" do |ansible|
+  config.vm.define "client-ubuntu-1604" do |c|
+    c.vm.box = "ubuntu/xenial64"
+    c.vm.hostname = "vagrant-ubuntu-test-client-01"
+    c.vm.network "private_network", ip: "192.168.33.71"
+    c.vm.provision "ansible" do |ansible|
+      ansible.playbook = "spacewalk-client.yml"
+      ansible.extra_vars = {
+        spacewalk_ip: "#{spacewalk_server_ip}",
+      }
+    end
+  end
+
+  config.vm.define "client-centos-7" do |c|
+    c.vm.box = "centos/7"
+    c.vm.hostname = "vagrant-centos-test-client-02"
+    c.vm.network "private_network", ip: "192.168.33.72"
+    c.vm.provision "ansible" do |ansible|
       ansible.playbook = "spacewalk-client.yml"
       ansible.extra_vars = {
         spacewalk_ip: "#{spacewalk_server_ip}",
