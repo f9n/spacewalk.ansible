@@ -1,6 +1,6 @@
 ---
 - hosts: spacewalk-client
-  sudo: yes
+  become: yes
   environment:
     no_proxy: "localhost, 127.0.0.1, spacewalk-server"
   roles:
@@ -9,3 +9,15 @@
         - 22
         - 5222
     - role: spacewalk-client
+    - role: jeffwidman.yum-cron
+      vars:
+        yumcron_apply_updates: yes
+        yum_cron_hourly_base_options:
+          - "exclude=kernel*"
+        yum_cron_daily_update_level: security
+        yum_cron_daily_download_updates: yes
+        yum_cron_daily_apply_updates: yes
+        yum_cron_daily_base_options: "{{ yum_cron_hourly_base_options }}"
+      when: ansible_distribution == 'CentOS'
+    - role: apt_security_upgrade
+      when: ansible_distribution == 'Ubuntu'

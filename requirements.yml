@@ -1,0 +1,3 @@
+- src: https://github.com/jeffwidman/ansible-yum-cron.git
+  version: 02681ab769b595002931ff3e829d2f17681d2f44
+  name: jeffwidman.yum-cron
